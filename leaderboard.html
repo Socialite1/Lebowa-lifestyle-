@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Leaderboard</title>
+  <title>Zartour Leaderboard</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
   <style>
@@ -25,7 +25,10 @@
 <div id="list"></div>
 
 <script>
-const supabase = supabase.createClient("YOUR_URL", "YOUR_KEY");
+const supabase = supabase.createClient(
+  "https://yykcwmxbhmpvhasgzygj.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl5a2N3bXhiaG1wdmhhc2d6eWdqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQzNDgxMjYsImV4cCI6MjA4OTkyNDEyNn0.p1rmjZvqSgpAVFj00FW5csffK6PXX1NrcAlWCQckRJ4"
+);
 
 async function loadLeaderboard() {
   let { data } = await supabase
