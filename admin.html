@@ -1,85 +1,42 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Zartour Admin</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+  <title>Admin</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-
-  <style>
-    body { font-family: Arial; background:#0f172a; color:white; padding:20px; }
-
-    input, button {
-      padding:10px;
-      margin:5px;
-      border-radius:5px;
-      border:none;
-    }
-
-    button {
-      background:orange;
-      cursor:pointer;
-    }
-
-    .card {
-      background:#1e293b;
-      padding:10px;
-      margin:10px 0;
-      border-radius:10px;
-    }
-  </style>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
 </head>
-
 <body>
 
-<h1>⚙️ Admin Panel</h1>
+<h2>Create Location QR</h2>
 
-<input id="name" placeholder="Location name">
+<input id="name" placeholder="Venue">
+<input id="lat" placeholder="Latitude">
+<input id="lng" placeholder="Longitude">
 <input id="points" placeholder="Points">
-<input id="code" placeholder="QR Code">
-<button onclick="addLocation()">Add Location</button>
 
-<div id="list"></div>
+<button onclick="create()">Create</button>
+
+<canvas id="qr"></canvas>
 
 <script>
 const supabase = supabase.createClient(
   "https://yykcwmxbhmpvhasgzygj.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl5a2N3bXhiaG1wdmhhc2d6eWdqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQzNDgxMjYsImV4cCI6MjA4OTkyNDEyNn0.p1rmjZvqSgpAVFj00FW5csffK6PXX1NrcAlWCQckRJ4"
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 );
 
-async function addLocation() {
-  let name = document.getElementById("name").value;
-  let points = parseInt(document.getElementById("points").value);
-  let code = document.getElementById("code").value;
+async function create() {
+  let code = "ZAR" + Math.random().toString(36).substring(7);
 
-  if (!name || !points || !code) {
-    alert("Fill all fields");
-    return;
-  }
-
-  await supabase.from("locations").insert({ name, points, code });
-
-  alert("Location added!");
-  loadLocations();
-}
-
-async function loadLocations() {
-  let { data } = await supabase.from("locations").select("*");
-
-  let html = "";
-
-  data.forEach(loc => {
-    html += `
-      <div class="card">
-        ${loc.name} - ${loc.points} pts (${loc.code})
-      </div>
-    `;
+  await supabase.from("locations").insert({
+    name: name.value,
+    lat: parseFloat(lat.value),
+    lng: parseFloat(lng.value),
+    points: parseInt(points.value),
+    code
   });
 
-  document.getElementById("list").innerHTML = html;
+  QRCode.toCanvas(document.getElementById("qr"), code);
 }
-
-loadLocations();
 </script>
 
 </body>
