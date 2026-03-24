@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Zartour Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+
+  <style>
+    body {
+      font-family: Arial;
+      margin: 0;
+      background: #0f172a;
+      color: white;
+    }
+
+    .header {
+      background: #16a34a;
+      padding: 20px;
+      border-bottom-left-radius: 20px;
+      border-bottom-right-radius: 20px;
+    }
+
+    .profile {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .profile img {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+    }
+
+    .balance {
+      margin-top: 10px;
+      font-size: 18px;
+    }
+
+    .actions {
+      display: flex;
+      justify-content: space-around;
+      margin: 20px;
+    }
+
+    .btn {
+      background: #1e293b;
+      padding: 10px 15px;
+      border-radius: 10px;
+      text-align: center;
+      cursor: pointer;
+    }
+
+    .cards {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding: 10px;
+    }
+
+    .card {
+      min-width: 140px;
+      background: white;
+      color: black;
+      border-radius: 10px;
+      padding: 10px;
+    }
+
+    .news {
+      padding: 15px;
+    }
+
+    .news-item {
+      background: #1e293b;
+      padding: 10px;
+      border-radius: 10px;
+      margin-bottom: 10px;
+    }
+
+    .scan-btn {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: orange;
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 24px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="header">
+  <div class="profile">
+    <img src="https://i.pravatar.cc/100">
+    <div>
+      <div id="username">Welcome back</div>
+      <div class="balance">Points: <span id="points">0</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="actions">
+  <div class="btn" onclick="goToLeaderboard()">Leaderboard</div>
+  <div class="btn" onclick="earnPoints()">Earn Points</div>
+  <div class="btn">Badges</div>
+</div>
+
+<div class="cards">
+  <div class="card">📍 Local Routes</div>
+  <div class="card">🍲 Food Spots</div>
+  <div class="card">🏺 Culture</div>
+</div>
+
+<div class="news">
+  <h3>Zartour Feed</h3>
+
+  <div class="news-item">🔥 New route in Ga-Mphahlele</div>
+  <div class="news-item">🏆 Top tourist this week</div>
+  <div class="news-item">🎉 Cultural event coming soon</div>
+</div>
+
+<div class="scan-btn" onclick="scanQR()">📷</div>
+
+<script>
+  const supabaseUrl = "YOUR_URL";
+  const supabaseKey = "YOUR_KEY";
+  const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+  let userId = null;
+
+  async function loadUser() {
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      alert("Login first");
+      return;
+    }
+
+    userId = user.id;
+    document.getElementById("username").innerText = user.email;
+
+    loadPoints();
+  }
+
+  async function loadPoints() {
+    const { data } = await supabase
+      .from("users")
+      .select("points")
+      .eq("id", userId)
+      .single();
+
+    if (data) {
+      document.getElementById("points").innerText = data.points;
+    }
+  }
+
+  async function earnPoints() {
+    let newPoints = Math.floor(Math.random() * 50) + 10;
+
+    await supabase
+      .from("users")
+      .update({ points: newPoints })
+      .eq("id", userId);
+
+    loadPoints();
+    alert("You earned points!");
+  }
+
+  function goToLeaderboard() {
+    window.location.href = "leaderboard.html";
+  }
+
+  function scanQR() {
+    alert("QR Scanner coming next phase");
+  }
+
+  loadUser();
+</script>
+
+</body>
+</html>
