@@ -3,7 +3,9 @@
 <head>
   <title>Zartour App</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <script src="https://unpkg.com/html5-qrcode"></script>
 
   <style>
     body { font-family: Arial; margin:0; background:#0f172a; color:white; }
@@ -17,7 +19,7 @@
 
     .btn {
       background:#1e293b;
-      padding:10px;
+      padding:12px;
       margin:10px;
       border-radius:10px;
       text-align:center;
@@ -39,6 +41,12 @@
       font-size:24px;
       cursor:pointer;
     }
+
+    #reader {
+      width:300px;
+      margin:20px auto;
+      display:none;
+    }
   </style>
 </head>
 
@@ -50,16 +58,23 @@
 </div>
 
 <div class="btn" onclick="goLeaderboard()">🏆 Leaderboard</div>
+<div class="btn" onclick="toggleScanner()">📷 Scan QR</div>
 
-<div class="scan" onclick="scanQR()">📷</div>
+<div id="reader"></div>
+
+<div class="scan" onclick="toggleScanner()">📷</div>
 
 <script>
-const supabaseUrl = "https://yykcwmxbhmpvhasgzygj.supabase.co";
-const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl5a2N3bXhiaG1wdmhhc2d6eWdqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQzNDgxMjYsImV4cCI6MjA4OTkyNDEyNn0.p1rmjZvqSgpAVFj00FW5csffK6PXX1NrcAlWCQckRJ4";
-const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+const supabaseClient = supabase.createClient(
+  "https://yykcwmxbhmpvhasgzygj.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl5a2N3bXhiaG1wdmhhc2d6eWdqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQzNDgxMjYsImV4cCI6MjA4OTkyNDEyNn0.p1rmjZvqSgpAVFj00FW5csffK6PXX1NrcAlWCQckRJ4"
+);
 
 let userId = null;
+let scanner = null;
+let scanning = false;
 
+// INIT
 async function init() {
   let { data: { user } } = await supabaseClient.auth.getUser();
 
@@ -74,7 +89,7 @@ async function init() {
       return;
     }
 
-    alert("Check your email to confirm!");
+    alert("Signup successful. Reload page.");
     return;
   }
 
@@ -98,6 +113,7 @@ async function init() {
   loadPoints();
 }
 
+// LOAD POINTS
 async function loadPoints() {
   let { data } = await supabaseClient
     .from("users")
@@ -110,11 +126,38 @@ async function loadPoints() {
   }
 }
 
-async function scanQR() {
-  let code = prompt("Enter location code");
+// TOGGLE SCANNER
+function toggleScanner() {
+  const reader = document.getElementById("reader");
 
-  if (!code) return;
+  if (!scanning) {
+    reader.style.display = "block";
 
+    scanner = new Html5Qrcode("reader");
+
+    scanner.start(
+      { facingMode: "environment" },
+      { fps: 10, qrbox: 250 },
+
+      async (decodedText) => {
+        await scanner.stop();
+        scanning = false;
+        reader.style.display = "none";
+        processScan(decodedText);
+      }
+    );
+
+    scanning = true;
+
+  } else {
+    scanner.stop();
+    scanning = false;
+    reader.style.display = "none";
+  }
+}
+
+// PROCESS SCAN
+async function processScan(code) {
   let { data: location } = await supabaseClient
     .from("locations")
     .select("*")
@@ -122,7 +165,7 @@ async function scanQR() {
     .single();
 
   if (!location) {
-    alert("Invalid code");
+    alert("Invalid QR Code");
     return;
   }
 
@@ -134,7 +177,7 @@ async function scanQR() {
     .maybeSingle();
 
   if (existing) {
-    alert("Already scanned this location");
+    alert("Already scanned");
     return;
   }
 
@@ -156,10 +199,11 @@ async function scanQR() {
     .update({ points: newPoints })
     .eq("id", userId);
 
-  alert("+" + location.points + " points!");
+  alert("🔥 +" + location.points + " points!");
   loadPoints();
 }
 
+// NAV
 function goLeaderboard() {
   window.location.href = "leaderboard.html";
 }
