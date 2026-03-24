@@ -54,13 +54,12 @@
 <div class="scan" onclick="scanQR()">📷</div>
 
 <script>
-const supabaseUrl = "YOUR_URL";
-const supabaseKey = "YOUR_KEY";
+const supabaseUrl = "https://yykcwmxbhmpvhasgzygj.supabase.co";
+const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl5a2N3bXhiaG1wdmhhc2d6eWdqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQzNDgxMjYsImV4cCI6MjA4OTkyNDEyNn0.p1rmjZvqSgpAVFj00FW5csffK6PXX1NrcAlWCQckRJ4";
 const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
 let userId = null;
 
-// INIT
 async function init() {
   let { data: { user } } = await supabaseClient.auth.getUser();
 
@@ -75,14 +74,13 @@ async function init() {
       return;
     }
 
-    alert("Check your email!");
+    alert("Check your email to confirm!");
     return;
   }
 
   userId = user.id;
   document.getElementById("username").innerText = user.email;
 
-  // Create user record if not exists
   let { data } = await supabaseClient
     .from("users")
     .select("*")
@@ -100,7 +98,6 @@ async function init() {
   loadPoints();
 }
 
-// LOAD POINTS
 async function loadPoints() {
   let { data } = await supabaseClient
     .from("users")
@@ -113,13 +110,11 @@ async function loadPoints() {
   }
 }
 
-// SCAN QR (CODE INPUT)
 async function scanQR() {
   let code = prompt("Enter location code");
 
   if (!code) return;
 
-  // Get location
   let { data: location } = await supabaseClient
     .from("locations")
     .select("*")
@@ -131,7 +126,6 @@ async function scanQR() {
     return;
   }
 
-  // Check if already scanned
   let { data: existing } = await supabaseClient
     .from("scans")
     .select("*")
@@ -144,13 +138,11 @@ async function scanQR() {
     return;
   }
 
-  // Save scan
   await supabaseClient.from("scans").insert({
     user_id: userId,
     location_id: location.id
   });
 
-  // Add points
   let { data: user } = await supabaseClient
     .from("users")
     .select("points")
@@ -168,7 +160,6 @@ async function scanQR() {
   loadPoints();
 }
 
-// NAV
 function goLeaderboard() {
   window.location.href = "leaderboard.html";
 }
