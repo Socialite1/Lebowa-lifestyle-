@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Leaderboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+
+  <style>
+    body { font-family: Arial; background:#0f172a; color:white; }
+    h1 { text-align:center; }
+
+    .card {
+      background:#1e293b;
+      padding:15px;
+      margin:10px;
+      border-radius:10px;
+      display:flex;
+      justify-content:space-between;
+    }
+  </style>
+</head>
+
+<body>
+
+<h1>🏆 Leaderboard</h1>
+<div id="list"></div>
+
+<script>
+const supabase = supabase.createClient("YOUR_URL", "YOUR_KEY");
+
+async function loadLeaderboard() {
+  let { data } = await supabase
+    .from("users")
+    .select("email, points")
+    .order("points", { ascending: false });
+
+  let html = "";
+
+  data.forEach((user, i) => {
+    html += `
+      <div class="card">
+        <div>#${i+1} ${user.email}</div>
+        <div>${user.points} pts</div>
+      </div>
+    `;
+  });
+
+  document.getElementById("list").innerHTML = html;
+}
+
+loadLeaderboard();
+</script>
+
+</body>
+</html>
